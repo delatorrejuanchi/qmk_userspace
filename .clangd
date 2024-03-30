@@ -1,0 +1,12 @@
+CompileFlags:
+  Add:
+    - -Wno-unknown-attributes
+    - -Wno-maybe-uninitialized
+    - -Wno-unknown-warning-option
+  Remove:
+    - -W*
+    - -m*
+  Compiler: clang
+Diagnostics:
+  Suppress:
+    - unused-includes
