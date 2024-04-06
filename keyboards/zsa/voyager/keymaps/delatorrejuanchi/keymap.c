@@ -63,6 +63,7 @@ enum combos {
     COMBO_PH,
     COMBO_MEH_1,
     COMBO_MEH_2,
+    COMBO_MEH_3,
 
     COMBO_LENGTH,
 };
@@ -79,6 +80,7 @@ const uint16_t PROGMEM combo_GM[] = {KC_G, KC_M, COMBO_END};
 const uint16_t PROGMEM combo_PL[] = {KC_P, KC_L, COMBO_END};
 const uint16_t PROGMEM combo_AE[] = {KC_A, KC_E, COMBO_END};
 const uint16_t PROGMEM combo_EI[] = {KC_E, KC_I, COMBO_END};
+const uint16_t PROGMEM combo_AI[] = {KC_A, KC_I, COMBO_END};
 
 // clang-format off
 combo_t key_combos[] = {
@@ -92,6 +94,7 @@ combo_t key_combos[] = {
     [COMBO_PH] = COMBO_ACTION(combo_PL),
     [COMBO_MEH_1] = COMBO_ACTION(combo_AE),
     [COMBO_MEH_2] = COMBO_ACTION(combo_EI),
+    [COMBO_MEH_3] = COMBO_ACTION(combo_AI),
 };
 // clang-format on
 
@@ -161,6 +164,12 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
         case COMBO_MEH_2:
             if (pressed) {
                 tap_code16(MEH(KC_2));
+            }
+            break;
+
+        case COMBO_MEH_3:
+            if (pressed) {
+                tap_code16(MEH(KC_3));
             }
             break;
     }
