@@ -10,8 +10,8 @@ enum layers {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [LAYER_MAIN] = LAYOUT_voyager(
         _______,         _______, _______, _______,       _______,      _______, _______, _______, _______, _______, _______, _______,
-        _______,         KC_X,    KC_W,    KC_M,          KC_G,         KC_J,    _______, _______, _______, _______, _______, _______,
-        KC_ESC,          KC_S,    KC_C,    KC_N,          KC_T,         KC_K,    _______, KC_A,    KC_E,    KC_I,    KC_H,    KC_ENT,
+        _______,         KC_X,    KC_W,    KC_M,          KC_G,         KC_J,    _______, KC_DOT,  KC_QUOT, _______, _______, _______,
+        KC_ESC,          KC_S,    KC_C,    KC_N,          KC_T,         KC_K,    KC_COMM, KC_A,    KC_E,    KC_I,    KC_H,    KC_ENT,
         KC_Z,            KC_B,    KC_P,    KC_L,          KC_D,         KC_V,    _______, KC_U,    KC_O,    KC_Y,    KC_F,    KC_Q,
         LT(LAYER_SYMBOL, KC_R),   KC_BSPC, OSM(MOD_RSFT), LT(LAYER_NAV, KC_SPACE)
     ),
@@ -51,6 +51,75 @@ uint16_t get_alt_repeat_key_keycode_user(uint16_t keycode, uint8_t mods) {
     return KC_KP_EQUAL;
 }
 
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!process_adaptive_keys(keycode, record)) {
+        return false;
+    }
+
+    return true;
+}
+
+uint16_t history[2] = {KC_NO, KC_NO};
+
+bool process_adaptive_keys(uint16_t keycode, keyrecord_t *record) {
+    bool cont = true;
+
+    if (record->event.pressed) {
+        switch (keycode) {
+            case KC_W: // MW -> MP
+                if (history[0] == KC_M) {
+                    tap_code16(KC_P);
+                    cont = false;
+                }
+                break;
+            case KC_M: // MWM -> MPL
+                if (history[0] == KC_W && history[1] == KC_M) {
+                    tap_code16(KC_L);
+                    cont = false;
+                }
+                break;
+            case KC_X: // MX -> MB
+                if (history[0] == KC_M) {
+                    tap_code16(KC_B);
+                    cont = false;
+                }
+                break;
+            case KC_QUOT: // IG' -> IGHT, DI' -> DIV
+                if (history[0] == KC_G && history[1] == KC_I) {
+                    tap_code16(KC_H);
+                    tap_code16(KC_T);
+                    cont = false;
+                }
+
+                if (history[0] == KC_I && history[1] == KC_D) {
+                    tap_code16(KC_V);
+                    cont = false;
+                }
+
+                break;
+            case KC_B: // CB -> SB
+                if (history[0] == KC_C) {
+                    tap_code16(KC_BACKSPACE);
+                    tap_code16(KC_S);
+                    tap_code16(KC_B);
+                    cont = false;
+                }
+                break;
+            case KC_C: // BC -> BS
+                if (history[0] == KC_B) {
+                    tap_code16(KC_S);
+                    cont = false;
+                }
+                break;
+        }
+    }
+
+    history[1] = history[0];
+    history[0] = keycode;
+
+    return cont;
+}
+
 #ifdef COMBO_ENABLE
 enum combos {
     COMBO_Z,
@@ -61,9 +130,6 @@ enum combos {
     COMBO_WH,
     COMBO_GH,
     COMBO_PH,
-    COMBO_MEH_1,
-    COMBO_MEH_2,
-    COMBO_MEH_3,
 
     COMBO_LENGTH,
 };
@@ -78,9 +144,6 @@ const uint16_t PROGMEM combo_SC[] = {KC_S, KC_C, COMBO_END};
 const uint16_t PROGMEM combo_WM[] = {KC_W, KC_M, COMBO_END};
 const uint16_t PROGMEM combo_GM[] = {KC_G, KC_M, COMBO_END};
 const uint16_t PROGMEM combo_PL[] = {KC_P, KC_L, COMBO_END};
-const uint16_t PROGMEM combo_AE[] = {KC_A, KC_E, COMBO_END};
-const uint16_t PROGMEM combo_EI[] = {KC_E, KC_I, COMBO_END};
-const uint16_t PROGMEM combo_AI[] = {KC_A, KC_I, COMBO_END};
 
 // clang-format off
 combo_t key_combos[] = {
@@ -92,9 +155,6 @@ combo_t key_combos[] = {
     [COMBO_WH] = COMBO_ACTION(combo_WM),
     [COMBO_GH] = COMBO_ACTION(combo_GM),
     [COMBO_PH] = COMBO_ACTION(combo_PL),
-    [COMBO_MEH_1] = COMBO_ACTION(combo_AE),
-    [COMBO_MEH_2] = COMBO_ACTION(combo_EI),
-    [COMBO_MEH_3] = COMBO_ACTION(combo_AI),
 };
 // clang-format on
 
@@ -152,24 +212,6 @@ void process_combo_event(uint16_t combo_index, bool pressed) {
             if (pressed) {
                 tap_code16(KC_P);
                 tap_code16(KC_H);
-            }
-            break;
-
-        case COMBO_MEH_1:
-            if (pressed) {
-                tap_code16(MEH(KC_1));
-            }
-            break;
-
-        case COMBO_MEH_2:
-            if (pressed) {
-                tap_code16(MEH(KC_2));
-            }
-            break;
-
-        case COMBO_MEH_3:
-            if (pressed) {
-                tap_code16(MEH(KC_3));
             }
             break;
     }
